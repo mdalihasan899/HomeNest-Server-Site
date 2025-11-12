@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 3000;
 
@@ -55,19 +55,27 @@ async function run() {
             res.send(result);
         })
 
+        // Delate Property
+        app.delete('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await allProperties.deleteOne(query);
+            res.send(result);
+        })
+
         // latest properties
         app.get('/latest-properties', async (req, res) => {
-            const cursor = allProperties.find().limit(6).sort({date: 1});
+            const cursor = allProperties.find().limit(6).sort({ date: 1 });
             const result = await cursor.toArray();
             res.send(result)
         })
 
-
-        // app.get('/latest-properties', async (req, res) => {
-        //     const cursor = allProperties.find();
-        //     const result = await cursor.toArray();
-        //     res.send(result)
-        // })
+        // All properties
+        app.get('/properties', async (req, res) => {
+            const cursor = allProperties.find();
+            const result = await cursor.toArray();
+            res.send(result)
+        })
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
