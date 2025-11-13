@@ -10,6 +10,7 @@ app.use(express.json());
 // FWDgJTqJkeYDAzlq
 const uri = "mongodb+srv://Hasan:FWDgJTqJkeYDAzlq@cluster0.lp1xwc5.mongodb.net/?appName=Cluster0";
 
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -57,19 +58,14 @@ async function run() {
 
         // Update Property
         app.patch('/properties/:id', async (req, res) => {
-            try {
-                const id = req.params.id;
-                const updatedProperty = req.body;
-                const query = { _id: new ObjectId(id) };
-                const result = await allProperties.updateOne(query, { $set: updatedProperty });
-                res.json({
-                    success: result.modifiedCount > 0,
-                    modifiedCount: result.modifiedCount
-                });
-            } catch (error) {
-                console.error(error);
-                res.status(500).json({ success: false, message: 'Server error' });
-            }
+            const id = req.params.id;
+            const updatedProperty = req.body;
+            const query = { _id: new ObjectId(id) };
+            const result = await allProperties.updateOne(query, { $set: updatedProperty });
+            res.json({
+                success: result.modifiedCount > 0,
+                modifiedCount: result.modifiedCount
+            });
         });
 
 
@@ -90,12 +86,20 @@ async function run() {
 
         // All properties
         app.get('/properties', async (req, res) => {
-            const cursor = allProperties.find();
+            const cursor = allProperties.find().sort({ date: 1 });
             const result = await cursor.toArray();
             res.send(result)
         })
 
-        await client.db("admin").command({ ping: 1 });
+        // Single Property Details
+        app.get('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const property = await allProperties.findOne(query);
+            res.send(property);
+        });
+
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     }
     finally {
