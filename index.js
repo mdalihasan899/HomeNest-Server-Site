@@ -55,6 +55,24 @@ async function run() {
             res.send(result);
         })
 
+        // Update Property
+        app.patch('/properties/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const updatedProperty = req.body;
+                const query = { _id: new ObjectId(id) };
+                const result = await allProperties.updateOne(query, { $set: updatedProperty });
+                res.json({
+                    success: result.modifiedCount > 0,
+                    modifiedCount: result.modifiedCount
+                });
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ success: false, message: 'Server error' });
+            }
+        });
+
+
         // Delate Property
         app.delete('/properties/:id', async (req, res) => {
             const id = req.params.id;
